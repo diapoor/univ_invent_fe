@@ -1,0 +1,53 @@
+/* UserList.css */
+
+/* Hiệu ứng hover cho các nút */
+.Button:hover {
+    background-color: #4CAF50; /* Màu xanh lá cây */
+  }
+  
+  /* Hiệu ứng animation cho hàng */
+  tr {
+    transition: all 0.3s ease-in-out;
+  }
+  
+  /* Hiệu ứng hover cho hàng */
+  tr:hover {
+    background-color: #f5f5f5; /* Màu xám nhạt */
+  }
+  
+  /* Hiệu ứng cho nút xóa */
+  .deleteButton {
+    background-color: #f44336; /* Màu đỏ */
+    color: white;
+  }
+  
+  .deleteButton:hover {
+    background-color: #cc0000; /* Màu đỏ nhạt */
+  }
+  
+  /* Hiển thị thông báo popup */
+  .toast-success {
+    background-color: #4CAF50; /* Màu xanh lá cây */
+  }
+  
+  .toast-error {
+    background-color: #f44336; /* Màu đỏ */
+  }
+  .search-container {
+    margin-bottom: 20px;
+  }
+  
+  .search-container input {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+  }
+  
+  .search-container input:focus {
+    border-color: #007bff;
+  }
+  
+  
