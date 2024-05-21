@@ -13,4 +13,11 @@
       visibility: hidden;
     }
   }
+  body {
+    background-image: url('./backgroundLogin.png');
+    background-size: cover; /* Phù hợp với kích thước của vùng hiển thị */
+    background-repeat: no-repeat; /* Không lặp lại ảnh */
+    background-attachment: fixed; /* Giữ ảnh tĩnh khi cuộn trang */
+}
+
  
