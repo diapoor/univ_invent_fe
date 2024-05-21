@@ -5,12 +5,12 @@ function Footer() {
   return (
     <footer className="footer">
       <div className="container">
-        <p>&copy; 2024 Your Website. All rights reserved.</p>
+        <p>&copy; 2024 University Inventory Management.</p>
         <div className="social-links">
-          <a href="#"><i className="fa fa-facebook"></i></a>
+          {/*<a href="#"><i className="fa fa-facebook"></i></a>
           <a href="#"><i className="fa fa-twitter"></i></a>
           <a href="#"><i className="fa fa-instagram"></i></a>
-          <a href="#"><i className="fa fa-linkedin"></i></a>
+          <a href="#"><i className="fa fa-linkedin"></i></a>*/}
         </div>
       </div>
     </footer>

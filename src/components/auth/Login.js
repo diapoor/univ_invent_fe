@@ -26,7 +26,7 @@ function Login() {
     if (error) {
       const timer = setTimeout(() => {
         setError('');
-      }, 5000); // 5seconds
+      }, 3000); // 3seconds
 
       return () => clearTimeout(timer);
     }

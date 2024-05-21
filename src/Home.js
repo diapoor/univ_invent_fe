@@ -4,19 +4,18 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
 import { useAuth } from './components/AuthContext';
 function Home() {
-  const { username, isLoggedIn, logout } = useAuth();
+  const { username, isLoggedIn, logout,whoLogin } = useAuth();
   const navigate = useNavigate();
   const [showLogout, setShowLogout] = useState(false);
 
   useEffect(() => {
     const storedExpiryTime = localStorage.getItem('expiryTime');
     const now = new Date().getTime();
-
+    console.log(isLoggedIn);
     if (!isLoggedIn || !storedExpiryTime || now >= storedExpiryTime) {
-      logout();
       navigate('/auth/login');
     }
-  }, [isLoggedIn, navigate, logout]);
+  }, [isLoggedIn, navigate, logout,whoLogin]);
 
   const handleUsernameClick = () => {
     setShowLogout(true);

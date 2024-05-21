@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Table, Button, Modal, Form, FormControl } from 'react-bootstrap';
+import { Table, Button, Modal, FormControl } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './UserList.css'; // Import CSS file for custom styling
@@ -15,52 +15,56 @@ function UserList() {
   const [deleteUsername, setDeleteUsername] = useState('');
 
   useEffect(() => {
-    loadUser();
+    loadUsers();
   }, []);
 
   // Function to load users
-  const loadUser = async () => {
+  const loadUsers = async () => {
     try {
       const result = await axios.get(
-        "http://localhost:8080/api/v1/user/list",
+        'http://localhost:8080/api/v1/user/list',
         {
           validateStatus: () => true,
         }
       );
       if (result.status === 200) {
         setUsers(result.data);
-        toast.success('Danh sách người dùng đã được tải thành công!');
+        toast.success('User list loaded successfully!');
       }
     } catch (error) {
-      console.error("Có lỗi xảy ra khi lấy dữ liệu người dùng!", error);
-      toast.error('Đã xảy ra lỗi khi tải danh sách người dùng!');
+      console.error('Error loading user data!', error);
+      toast.error('Error loading user list!');
     }
   };
 
   // Function to delete user
   const deleteUser = async (username) => {
-    setDeleteUsername(username); // Lưu tên người dùng cần xóa vào state
-    setShowConfirmDeleteModal(true); // Hiển thị popup hỏi trước khi xóa
+    setDeleteUsername(username); // Store the username to delete in state
+    setShowConfirmDeleteModal(true); // Show the confirmation modal before deletion
   };
+
   const confirmDeleteUser = async () => {
-    try {
-      const response = await axios.delete(
-        `http://localhost:8080/api/v1/user/delete/${deleteUsername}`
-      );
-      if (response.status === 200) {
-        setUsers(users.filter(user => user.username !== deleteUsername));
-        toast.success('Người dùng đã được xóa thành công!');
-        setShowConfirmDeleteModal(false); // Đóng popup hỏi sau khi xóa thành công
-        setShowDeleteModal(true);
-      } else {
-        toast.error('Đã xảy ra lỗi khi xóa người dùng!');
+    if (deleteUsername === localStorage.getItem('username')) {
+      toast.error(`Can't delete User: user Activing!`);
+    } else {
+      try {
+        const response = await axios.delete(
+          `http://localhost:8080/api/v1/user/delete/${deleteUsername}`
+        );
+        if (response.status === 200) {
+          setUsers(users.filter(user => user.username !== deleteUsername));
+          toast.success('User deleted successfully!');
+          setShowConfirmDeleteModal(false); // Close the confirmation modal after successful deletion
+          setShowDeleteModal(true);
+        } else {
+          toast.error('Error deleting user!');
+        }
+      } catch (error) {
+        console.error('Error deleting user!', error);
+        toast.error('Error deleting user!');
       }
-    } catch (error) {
-      console.error("Có lỗi xảy ra khi xóa người dùng!", error);
-      toast.error('Đã xảy ra lỗi khi xóa người dùng!');
     }
   };
-  
 
   // Function to show user details
   const showUserDetails = async (username) => {
@@ -70,11 +74,11 @@ function UserList() {
         setSelectedUser(response.data);
         setShowUserDetailsModal(true);
       } else {
-        toast.error('Không thể tìm thấy thông tin người dùng!');
+        toast.error('User not found!');
       }
     } catch (error) {
-      console.error("Có lỗi xảy ra khi lấy thông tin người dùng!", error);
-      toast.error('Đã xảy ra lỗi khi lấy thông tin người dùng!');
+      console.error('Error fetching user details!', error);
+      toast.error('Error fetching user details!');
     }
   };
 
@@ -91,11 +95,11 @@ function UserList() {
 
   return (
     <section>
-      <h2 className="section-title">Danh sách người dùng</h2>
+      <h2 className="section-title">User List</h2>
       <div className="search-container">
         <FormControl
           type="text"
-          placeholder="Tìm kiếm..."
+          placeholder="Search..."
           value={searchValue}
           onChange={handleSearchChange}
         />
@@ -104,8 +108,8 @@ function UserList() {
         <thead>
           <tr>
             <th>#</th>
-            <th>User name</th>
-            <th>Full name</th>
+            <th>Username</th>
+            <th>Full Name</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -124,53 +128,53 @@ function UserList() {
         </tbody>
       </Table>
 
-      {/* Modal confimdelete */}
+      {/* Confirm Delete Modal */}
       <Modal show={showConfirmDeleteModal} onHide={() => setShowConfirmDeleteModal(false)}>
         <Modal.Header closeButton>
-        <Modal.Title>Xác nhận xóa người dùng</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        Bạn có chắc chắn muốn xóa người dùng {deleteUsername} không?
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={() => setShowConfirmDeleteModal(false)}>Hủy</Button>
-        <Button variant="danger" onClick={confirmDeleteUser}>Xóa</Button>
-      </Modal.Footer>
-      </Modal>
-
-      {/* Modal hiển thị khi xóa thành công */}
-      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Thông báo</Modal.Title>
+          <Modal.Title>Confirm User Deletion</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Người dùng đã được xóa thành công!
+          Are you sure you want to delete user {deleteUsername}?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowConfirmDeleteModal(false)}>Cancel</Button>
+          <Button variant="danger" onClick={confirmDeleteUser}>Delete</Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Delete Success Modal */}
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Notification</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          User deleted successfully!
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-            Đóng
+            Close
           </Button>
         </Modal.Footer>
       </Modal>
 
-      {/* Modal hiển thị chi tiết người dùng */}
+      {/* User Details Modal */}
       <Modal show={showUserDetailsModal} onHide={() => setShowUserDetailsModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Chi tiết người dùng</Modal.Title>
+          <Modal.Title>User Details</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {selectedUser && (
             <div>
-              <p><strong>User Id:</strong> {selectedUser.userId}</p>
-              <p><strong>User name:</strong> {selectedUser.username}</p>
-              <p><strong>Full name:</strong> {selectedUser.fullName}</p>
-              {/* Thêm thông tin chi tiết khác nếu cần */}
+              <p><strong>User ID:</strong> {selectedUser.userId}</p>
+              <p><strong>Username:</strong> {selectedUser.username}</p>
+              <p><strong>Full Name:</strong> {selectedUser.fullName}</p>
+              {/* Add more user details if needed */}
             </div>
           )}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowUserDetailsModal(false)}>
-            Đóng
+            Close
           </Button>
         </Modal.Footer>
       </Modal>

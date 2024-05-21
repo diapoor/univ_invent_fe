@@ -1,4 +1,3 @@
-// AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
@@ -11,11 +10,13 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const storedUsername = localStorage.getItem('username');
-    const storedExpiryTime = localStorage.getItem('expiryTime');
+    const storedExpiryTime = parseInt(localStorage.getItem('expiryTime'));
     const now = new Date().getTime();
-
-    if (storedUsername && storedExpiryTime && now < storedExpiryTime) {
+    console.log(storedUsername);
+    if (storedUsername && !isNaN(storedExpiryTime) && now < storedExpiryTime) {
+      console.log(storedUsername);
       setUsername(storedUsername);
+
       setExpiryTime(storedExpiryTime);
     } else {
       localStorage.removeItem('username');
@@ -24,11 +25,12 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (username) => {
+    console.log(username);
     const expiryTime = new Date().getTime() + 10 * 60 * 1000; // 10 minutes from now
     setUsername(username);
     setExpiryTime(expiryTime);
-    localStorage.setItem('username', username);
-    localStorage.setItem('expiryTime', expiryTime);
+    localStorage.setItem('username',username);
+    localStorage.setItem('expiryTime', expiryTime.toString());
   };
 
   const logout = () => {
@@ -37,8 +39,9 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('username');
     localStorage.removeItem('expiryTime');
   };
-
+  console.log(username);
   const isLoggedIn = !!username;
+  console.log(isLoggedIn);
 
   return (
     <AuthContext.Provider value={{ username, login, logout, isLoggedIn }}>
