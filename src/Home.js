@@ -11,7 +11,6 @@ function Home() {
   useEffect(() => {
     const storedExpiryTime = localStorage.getItem('expiryTime');
     const now = new Date().getTime();
-    console.log(isLoggedIn);
     if (!isLoggedIn || !storedExpiryTime || now >= storedExpiryTime) {
       navigate('/auth/login');
     }

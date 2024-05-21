@@ -16,7 +16,6 @@ export const AuthProvider = ({ children }) => {
     if (storedUsername && !isNaN(storedExpiryTime) && now < storedExpiryTime) {
       console.log(storedUsername);
       setUsername(storedUsername);
-
       setExpiryTime(storedExpiryTime);
     } else {
       localStorage.removeItem('username');
