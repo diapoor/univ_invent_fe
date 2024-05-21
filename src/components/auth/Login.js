@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Login.css';
+import { useAuth } from '../AuthContext';
+
 
 function Login() {
   const [activeTab, setActiveTab] = useState('login');
@@ -13,30 +15,32 @@ function Login() {
   const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
   const [done, setDone] = useState('');
-  const [loginAttempts, setLoginAttempts] = useState(0);
+  const { login, isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
  
   useEffect(() => {
+    if (isLoggedIn) {
+      navigate('/');
+    }
     if (error) {
       const timer = setTimeout(() => {
         setError('');
-      }, 10000); // 10 seconds
+      }, 5000); // 5seconds
 
       return () => clearTimeout(timer);
     }
-  }, [error]);
+  }, [error, isLoggedIn, navigate]);
 
   const handleLogin = async () => {
     try {
       const response = await axios.post('http://localhost:8080/api/v1/auth/login', { username, password });
       console.log('Login successful:', response.data);
-      localStorage.setItem('username', username);
+      login(username);
       // Redirect to the Home page after successful login
-      navigate('/home');
+      navigate('/');
     } catch (error) {
       setError('Incorrect account');
-      setLoginAttempts(loginAttempts + 1);
     }
   };
 

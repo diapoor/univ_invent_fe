@@ -1,0 +1,25 @@
+/* Định dạng chung cho footer */
+.footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px 0;
+    text-align: center;
+  }
+  
+  /* Định dạng cho phần bản quyền */
+  .footer p {
+    margin: 0;
+  }
+  
+  /* Định dạng cho các liên kết mạng xã hội */
+  .social-links a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 24px;
+    margin: 0 10px;
+  }
+  
+  .social-links a:hover {
+    color: #ccc;
+  }
+  

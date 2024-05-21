@@ -1,21 +1,34 @@
-
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Thay đổi từ Switch thành Routes
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './Home';
-import AppBar from './components/Appbar';
 import UserList from './components/user/UserList';
+import Warehouse from './components/warehouse/WareHouse';
 import Login from './components/auth/Login';
+import { AuthProvider } from './components/AuthContext';
+import Layout from './components/layout/Layout';
 
 function App() {
   return (
-    <Router>
-      <Routes> {/* Thay thế Switch bằng Routes */}
-        <Route path="/" exact element={<Login />} /> 
-        <Route path="/home" element={<Home />} /> 
-        <Route path="/user" element={<UserList />} />
-        {/* Các tuyến đường khác nếu có */}
-      </Routes> {/* Kết thúc Routes */}
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/auth/login" element={<Login />} />
+          <Route
+            path="*"
+            element={
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/user" element={<UserList />} />
+                  <Route path="/ware-house" element={<Warehouse />} />
+                  {/* Add more routes for other pages */}
+                </Routes>
+              </Layout>
+            }
+          />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
