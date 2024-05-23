@@ -8,6 +8,8 @@ import { AuthProvider } from "./components/AuthContext";
 import Layout from "./components/layout/Layout";
 import InventoryManagement from "./components/inventory/Inventory";
 import CreateInventory from "./components/inventory/CreateInventory";
+import InventoryDetails from "./components/inventory/InventoryDetails";
+import UpdateInventory from "./components/inventory/UpdateInventory";
 function App() {
   return (
     <AuthProvider>
@@ -26,6 +28,14 @@ function App() {
                   <Route
                     path="/inventory/create"
                     element={<CreateInventory />}
+                  />
+                  <Route
+                    path="/inventory/details/:id"
+                    element={<InventoryDetails />}
+                  />
+                  <Route
+                    path="/inventory/update/:id"
+                    element={<UpdateInventory />}
                   />
                   {/* Add more routes for other pages */}
                 </Routes>

@@ -12,19 +12,16 @@ export const AuthProvider = ({ children }) => {
     const storedUsername = localStorage.getItem("username");
     const storedExpiryTime = parseInt(localStorage.getItem("expiryTime"));
     const now = new Date().getTime();
-    console.log(storedUsername);
+
     if (storedUsername && !isNaN(storedExpiryTime) && now < storedExpiryTime) {
-      console.log(storedUsername);
       setUsername(storedUsername);
       setExpiryTime(storedExpiryTime);
     } else {
-      localStorage.removeItem("username");
-      localStorage.removeItem("expiryTime");
+      logout(); // Nếu không có thông tin đăng nhập hợp lệ, tự động logout
     }
   }, []);
 
   const login = (username) => {
-    console.log(username);
     const expiryTime = new Date().getTime() + 10 * 60 * 1000; // 10 minutes from now
     setUsername(username);
     setExpiryTime(expiryTime);
@@ -38,9 +35,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("username");
     localStorage.removeItem("expiryTime");
   };
-  console.log(username);
+
   const isLoggedIn = !!username;
-  console.log(isLoggedIn);
 
   return (
     <AuthContext.Provider value={{ username, login, logout, isLoggedIn }}>

@@ -1,18 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Table, Button, Modal, FormControl } from 'react-bootstrap';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import './UserList.css'; // Import CSS file for custom styling
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Table, Button, Modal, FormControl } from "react-bootstrap";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./UserList.css";
+import { useAuth } from "../AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function UserList() {
   const [users, setUsers] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState("");
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
-  const [deleteUsername, setDeleteUsername] = useState('');
+  const [deleteUsername, setDeleteUsername] = useState("");
+  const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
+
+  useEffect(() => {
+    const storedExpiryTime = parseInt(localStorage.getItem("expiryTime"));
+    const now = new Date().getTime();
+
+    if (!isLoggedIn || !storedExpiryTime || now >= storedExpiryTime) {
+      navigate("/auth/login");
+    }
+  }, [isLoggedIn, navigate]);
 
   useEffect(() => {
     loadUsers();
@@ -21,19 +34,16 @@ function UserList() {
   // Function to load users
   const loadUsers = async () => {
     try {
-      const result = await axios.get(
-        'http://localhost:8080/api/v1/user/list',
-        {
-          validateStatus: () => true,
-        }
-      );
+      const result = await axios.get("http://localhost:8080/api/v1/user/list", {
+        validateStatus: () => true,
+      });
       if (result.status === 200) {
         setUsers(result.data);
-        toast.success('User list loaded successfully!');
+        toast.success("User list loaded successfully!");
       }
     } catch (error) {
-      console.error('Error loading user data!', error);
-      toast.error('Error loading user list!');
+      console.error("Error loading user data!", error);
+      toast.error("Error loading user list!");
     }
   };
 
@@ -44,7 +54,7 @@ function UserList() {
   };
 
   const confirmDeleteUser = async () => {
-    if (deleteUsername === localStorage.getItem('username')) {
+    if (deleteUsername === localStorage.getItem("username")) {
       toast.error(`Can't delete User: user Activing!`);
     } else {
       try {
@@ -52,16 +62,16 @@ function UserList() {
           `http://localhost:8080/api/v1/user/delete/${deleteUsername}`
         );
         if (response.status === 200) {
-          setUsers(users.filter(user => user.username !== deleteUsername));
-          toast.success('User deleted successfully!');
+          setUsers(users.filter((user) => user.username !== deleteUsername));
+          toast.success("User deleted successfully!");
           setShowConfirmDeleteModal(false); // Close the confirmation modal after successful deletion
           setShowDeleteModal(true);
         } else {
-          toast.error('Error deleting user!');
+          toast.error("Error deleting user!");
         }
       } catch (error) {
-        console.error('Error deleting user!', error);
-        toast.error('Error deleting user!');
+        console.error("Error deleting user!", error);
+        toast.error("Error deleting user!");
       }
     }
   };
@@ -69,16 +79,18 @@ function UserList() {
   // Function to show user details
   const showUserDetails = async (username) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/v1/user/get/${username}`);
+      const response = await axios.get(
+        `http://localhost:8080/api/v1/user/get/${username}`
+      );
       if (response.status === 200) {
         setSelectedUser(response.data);
         setShowUserDetailsModal(true);
       } else {
-        toast.error('User not found!');
+        toast.error("User not found!");
       }
     } catch (error) {
-      console.error('Error fetching user details!', error);
-      toast.error('Error fetching user details!');
+      console.error("Error fetching user details!", error);
+      toast.error("Error fetching user details!");
     }
   };
 
@@ -88,9 +100,10 @@ function UserList() {
   };
 
   // Filter users based on search value
-  const filteredUsers = users.filter(user =>
-    user.username.toLowerCase().includes(searchValue.toLowerCase()) ||
-    user.fullName.toLowerCase().includes(searchValue.toLowerCase())
+  const filteredUsers = users.filter(
+    (user) =>
+      user.username.toLowerCase().includes(searchValue.toLowerCase()) ||
+      user.fullName.toLowerCase().includes(searchValue.toLowerCase())
   );
 
   return (
@@ -120,8 +133,16 @@ function UserList() {
               <td>{user.username}</td>
               <td>{user.fullName}</td>
               <td>
-                <Button variant="primary" onClick={() => showUserDetails(user.username)}>View</Button>{' '}
-                <Button variant="danger" onClick={() => deleteUser(user.username)}>Delete</Button>
+                <Button
+                  variant="primary"
+                  onClick={() => showUserDetails(user.username)}>
+                  View
+                </Button>{" "}
+                <Button
+                  variant="danger"
+                  onClick={() => deleteUser(user.username)}>
+                  Delete
+                </Button>
               </td>
             </tr>
           ))}
@@ -129,7 +150,9 @@ function UserList() {
       </Table>
 
       {/* Confirm Delete Modal */}
-      <Modal show={showConfirmDeleteModal} onHide={() => setShowConfirmDeleteModal(false)}>
+      <Modal
+        show={showConfirmDeleteModal}
+        onHide={() => setShowConfirmDeleteModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Confirm User Deletion</Modal.Title>
         </Modal.Header>
@@ -137,8 +160,14 @@ function UserList() {
           Are you sure you want to delete user {deleteUsername}?
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowConfirmDeleteModal(false)}>Cancel</Button>
-          <Button variant="danger" onClick={confirmDeleteUser}>Delete</Button>
+          <Button
+            variant="secondary"
+            onClick={() => setShowConfirmDeleteModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmDeleteUser}>
+            Delete
+          </Button>
         </Modal.Footer>
       </Modal>
 
@@ -147,9 +176,7 @@ function UserList() {
         <Modal.Header closeButton>
           <Modal.Title>Notification</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          User deleted successfully!
-        </Modal.Body>
+        <Modal.Body>User deleted successfully!</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
             Close
@@ -158,22 +185,32 @@ function UserList() {
       </Modal>
 
       {/* User Details Modal */}
-      <Modal show={showUserDetailsModal} onHide={() => setShowUserDetailsModal(false)}>
+      <Modal
+        show={showUserDetailsModal}
+        onHide={() => setShowUserDetailsModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>User Details</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {selectedUser && (
             <div>
-              <p><strong>User ID:</strong> {selectedUser.userId}</p>
-              <p><strong>Username:</strong> {selectedUser.username}</p>
-              <p><strong>Full Name:</strong> {selectedUser.fullName}</p>
+              <p>
+                <strong>User ID:</strong> {selectedUser.userId}
+              </p>
+              <p>
+                <strong>Username:</strong> {selectedUser.username}
+              </p>
+              <p>
+                <strong>Full Name:</strong> {selectedUser.fullName}
+              </p>
               {/* Add more user details if needed */}
             </div>
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowUserDetailsModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowUserDetailsModal(false)}>
             Close
           </Button>
         </Modal.Footer>
