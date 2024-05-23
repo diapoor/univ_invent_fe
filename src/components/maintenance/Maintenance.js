@@ -9,35 +9,35 @@ import {
   Row,
   Col,
 } from "react-bootstrap";
-import { FaEdit, FaTrash } from "react-icons/fa";
-import { FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import {
+  FaEdit,
+  FaTrash,
+  FaCheckCircle,
+  FaExclamationCircle,
+} from "react-icons/fa";
 import { useAuth } from "../AuthContext";
+import { useNavigate } from "react-router-dom";
 
-const API_BASE_URL = "http://localhost:8080/api/v1/borrow";
+const API_BASE_URL = "http://localhost:8080/api/v1/maintenance";
 
-const BorrowManagement = () => {
-  const [borrows, setBorrows] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+const MaintenanceManagement = () => {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
-  const [borrowData, setBorrowData] = useState({
+  const [maintenances, setMaintenances] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [maintenanceData, setMaintenanceData] = useState({
     itemId: "",
-    borrowerName: "",
-    borrowerPhone: "",
-    borrowedDate: new Date().toISOString().slice(0, 10),
-    dueDate: new Date().toISOString().slice(0, 10),
-    returnedDate: "",
+    issueDescription: "",
+    reportedDate: new Date().toISOString().slice(0, 10),
+    resolvedDate: "",
     status: "",
   });
   const [showEditModal, setShowEditModal] = useState(false);
   const [editData, setEditData] = useState({
     itemId: "",
-    borrowerName: "",
-    borrowerPhone: "",
-    borrowedDate: "",
-    dueDate: "",
-    returnedDate: "",
+    issueDescription: "",
+    reportedDate: "",
+    resolvedDate: "",
     status: "",
   });
   const [searchValue, setSearchValue] = useState("");
@@ -46,7 +46,8 @@ const BorrowManagement = () => {
     type: "",
     content: "",
   });
-  const statusOptions = ["OVERDUE", "RETURNED", "BORROWED"];
+  const statusOptions = ["PENDING", "RESOLVED", "IN_PROGRESS"];
+
   useEffect(() => {
     const storedExpiryTime = parseInt(localStorage.getItem("expiryTime"));
     const now = new Date().getTime();
@@ -55,16 +56,17 @@ const BorrowManagement = () => {
       navigate("/auth/login");
     }
   }, [isLoggedIn, navigate]);
+
   useEffect(() => {
-    fetchBorrows();
+    fetchMaintenances();
   }, []);
 
-  const fetchBorrows = async () => {
+  const fetchMaintenances = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/list`);
-      setBorrows(response.data);
+      setMaintenances(response.data);
     } catch (error) {
-      console.error("Error fetching borrows:", error);
+      console.error("Error fetching maintenances:", error);
     }
   };
 
@@ -76,8 +78,8 @@ const BorrowManagement = () => {
     setShowModal(false);
   };
 
-  const handleShowEditModal = (borrow) => {
-    setEditData(borrow);
+  const handleShowEditModal = (maintenance) => {
+    setEditData(maintenance);
     setShowEditModal(true);
   };
 
@@ -92,92 +94,77 @@ const BorrowManagement = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setBorrowData({ ...borrowData, [name]: value });
-  };
-
-  const handleAddBorrow = async () => {
-    if (
-      !borrowData.itemId ||
-      !borrowData.borrowerName ||
-      !borrowData.borrowerPhone ||
-      !borrowData.borrowedDate ||
-      !borrowData.dueDate ||
-      !borrowData.status
-    ) {
-      showMessage("error", "Please fill in all required fields.");
-      return;
-    }
-
-    if (!/^0\d{9}$/.test(borrowData.borrowerPhone)) {
-      showMessage(
-        "error",
-        "Please enter a valid phone number starting with 0 and containing 10 digits."
-      );
-      return;
-    }
-
-    try {
-      const response = await axios.post(`${API_BASE_URL}/add`, borrowData);
-      fetchBorrows();
-      handleCloseModal();
-      showMessage("success", "Borrow added successfully!");
-    } catch (error) {
-      showMessage("error", error.response.data);
-    }
+    setMaintenanceData({ ...maintenanceData, [name]: value });
   };
 
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
   };
 
-  const handleUpdateBorrow = async () => {
+  const handleAddMaintenance = async () => {
+    if (
+      !maintenanceData.itemId ||
+      !maintenanceData.issueDescription ||
+      !maintenanceData.reportedDate ||
+      !maintenanceData.status
+    ) {
+      showMessage("error", "Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/add`, maintenanceData);
+      fetchMaintenances();
+      handleCloseModal();
+      showMessage("success", "Maintenance added successfully!");
+    } catch (error) {
+      showMessage("error", error.response.data);
+    }
+  };
+
+  const handleUpdateMaintenance = async () => {
     if (
       !editData.itemId ||
-      !editData.borrowerName ||
-      !editData.borrowerPhone ||
-      !editData.borrowedDate ||
-      !editData.dueDate ||
+      !editData.issueDescription ||
+      !editData.reportedDate ||
       !editData.status
     ) {
       showMessage("error", "Please fill in all required fields.");
       return;
     }
 
-    if (!/^0\d{9}$/.test(editData.borrowerPhone)) {
-      showMessage(
-        "error",
-        "Please enter a valid phone number starting with 0 and containing 10 digits."
-      );
-      return;
-    }
     try {
       const response = await axios.put(
-        `${API_BASE_URL}/update/${editData.borrowingId}`,
+        `${API_BASE_URL}/update/${editData.maintenanceId}`,
         editData
       );
-      fetchBorrows();
+      fetchMaintenances();
       handleCloseEditModal();
-      showMessage("success", "Borrow updated successfully!");
+      showMessage("success", "Maintenance updated successfully!");
     } catch (error) {
       showMessage("error", error.response.data);
     }
   };
 
-  const handleDeleteBorrow = async (borrowId) => {
+  const handleDeleteMaintenance = async (maintenanceId) => {
     try {
-      const response = await axios.delete(`${API_BASE_URL}/delete/${borrowId}`);
-      fetchBorrows();
-      showMessage("success", "Borrow deleted successfully!");
+      const response = await axios.delete(
+        `${API_BASE_URL}/delete/${maintenanceId}`
+      );
+      fetchMaintenances();
+      showMessage("success", "Maintenance deleted successfully!");
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
-        "An error occurred while deleting borrow";
+        "An error occurred while deleting maintenance";
       showMessage("error", errorMessage);
     }
   };
 
-  const filteredBorrows = borrows.filter((borrow) =>
-    borrow.borrowerName.toLowerCase().includes(searchValue.toLowerCase())
+  const filteredMaintenances = maintenances.filter((maintenance) =>
+    maintenance.issueDescription
+      .toLowerCase()
+      .includes(searchValue.toLowerCase())
   );
 
   const showMessage = (type, content) => {
@@ -189,52 +176,50 @@ const BorrowManagement = () => {
 
   return (
     <div className="container mt-5">
-      <h1 className="mb-4">Borrow Management</h1>
+      <h1 className="mb-4">Maintenance Management</h1>
       <div className="mb-3">
         <FormControl
           type="text"
-          placeholder="Search by borrower name..."
+          placeholder="Search by issue description..."
           value={searchValue}
           onChange={handleSearchChange}
         />
       </div>
       <Button variant="primary" onClick={handleShowModal}>
-        Add Borrow
+        Add Maintenance
       </Button>
       <Table striped bordered hover className="mt-3">
         <thead>
           <tr>
-            <th>Borrowing ID</th>
+            <th>Maintenance ID</th>
             <th>Item ID</th>
-            <th>Borrower Name</th>
-            <th>Borrower Phone</th>
-            <th>Borrowed Date</th>
-            <th>Due Date</th>
-            <th>Returned Date</th>
+            <th>Issue Description</th>
+            <th>Reported Date</th>
+            <th>Resolved Date</th>
             <th>Status</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          {filteredBorrows.map((borrow) => (
-            <tr key={borrow.borrowingId}>
-              <td>{borrow.borrowingId}</td>
-              <td>{borrow.itemId}</td>
-              <td>{borrow.borrowerName}</td>
-              <td>{borrow.borrowerPhone}</td>
-              <td>{borrow.borrowedDate}</td>
-              <td>{borrow.dueDate}</td>
-              <td>{borrow.returnedDate || "-"}</td>
-              <td>{borrow.status}</td>
+          {filteredMaintenances.map((maintenance) => (
+            <tr key={maintenance.maintenanceId}>
+              <td>{maintenance.maintenanceId}</td>
+              <td>{maintenance.itemId}</td>
+              <td>{maintenance.issueDescription}</td>
+              <td>{maintenance.reportedDate}</td>
+              <td>{maintenance.resolvedDate || "-"}</td>
+              <td>{maintenance.status}</td>
               <td>
                 <Button
                   variant="info"
-                  onClick={() => handleShowEditModal(borrow)}>
+                  onClick={() => handleShowEditModal(maintenance)}>
                   <FaEdit />
                 </Button>
                 <Button
                   variant="danger"
-                  onClick={() => handleDeleteBorrow(borrow.borrowingId)}>
+                  onClick={() =>
+                    handleDeleteMaintenance(maintenance.maintenanceId)
+                  }>
                   <FaTrash />
                 </Button>
               </td>
@@ -245,7 +230,7 @@ const BorrowManagement = () => {
 
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Add Borrow</Modal.Title>
+          <Modal.Title>Add Maintenance</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -257,19 +242,19 @@ const BorrowManagement = () => {
                     type="text"
                     placeholder="Enter item ID"
                     name="itemId"
-                    value={borrowData.itemId}
+                    value={maintenanceData.itemId}
                     onChange={handleChange}
                   />
                 </Form.Group>
               </Col>
               <Col>
-                <Form.Group controlId="formBorrowerName">
-                  <Form.Label>Borrower Name</Form.Label>
+                <Form.Group controlId="formIssueDescription">
+                  <Form.Label>Issue Description</Form.Label>
                   <Form.Control
                     type="text"
-                    placeholder="Enter borrower name"
-                    name="borrowerName"
-                    value={borrowData.borrowerName}
+                    placeholder="Enter issue description"
+                    name="issueDescription"
+                    value={maintenanceData.issueDescription}
                     onChange={handleChange}
                   />
                 </Form.Group>
@@ -277,48 +262,23 @@ const BorrowManagement = () => {
             </Row>
             <Row>
               <Col>
-                <Form.Group controlId="formBorrowerPhone">
-                  <Form.Label>Borrower Phone</Form.Label>
+                <Form.Group controlId="formReportedDate">
+                  <Form.Label>Reported Date</Form.Label>
                   <Form.Control
-                    type="text"
-                    placeholder="Enter borrower phone"
-                    name="borrowerPhone"
-                    value={borrowData.borrowerPhone}
+                    type="date"
+                    name="reportedDate"
+                    value={maintenanceData.reportedDate}
                     onChange={handleChange}
                   />
                 </Form.Group>
               </Col>
               <Col>
-                <Form.Group controlId="formBorrowedDate">
-                  <Form.Label>Borrowed Date</Form.Label>
+                <Form.Group controlId="formResolvedDate">
+                  <Form.Label>Resolved Date</Form.Label>
                   <Form.Control
                     type="date"
-                    name="borrowedDate"
-                    value={borrowData.borrowedDate}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                <Form.Group controlId="formDueDate">
-                  <Form.Label>Due Date</Form.Label>
-                  <Form.Control
-                    type="date"
-                    name="dueDate"
-                    value={borrowData.dueDate}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-              <Col>
-                <Form.Group controlId="formReturnedDate">
-                  <Form.Label>Returned Date</Form.Label>
-                  <Form.Control
-                    type="date"
-                    name="returnedDate"
-                    value={borrowData.returnedDate}
+                    name="resolvedDate"
+                    value={maintenanceData.resolvedDate}
                     onChange={handleChange}
                   />
                 </Form.Group>
@@ -331,7 +291,7 @@ const BorrowManagement = () => {
                   <Form.Control
                     as="select"
                     name="status"
-                    value={borrowData.status}
+                    value={maintenanceData.status}
                     onChange={handleChange}>
                     <option value="">Select status</option>
                     {statusOptions.map((status) => (
@@ -349,31 +309,15 @@ const BorrowManagement = () => {
           <Button variant="secondary" onClick={handleCloseModal}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleAddBorrow}>
+          <Button variant="primary" onClick={handleAddMaintenance}>
             Save
           </Button>
         </Modal.Footer>
       </Modal>
 
-      <Modal
-        show={message.show}
-        onHide={() => setMessage({ ...message, show: false })}
-        centered>
-        <Modal.Body
-          className={`text-${
-            message.type === "success" ? "success" : "danger"
-          }`}>
-          {message.type === "success" ? (
-            <FaCheckCircle className="mr-2" />
-          ) : (
-            <FaExclamationCircle className="mr-2" />
-          )}
-          {message.content}
-        </Modal.Body>
-      </Modal>
       <Modal show={showEditModal} onHide={handleCloseEditModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Borrow</Modal.Title>
+          <Modal.Title>Edit Maintenance</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -391,13 +335,13 @@ const BorrowManagement = () => {
                 </Form.Group>
               </Col>
               <Col>
-                <Form.Group controlId="formBorrowerName">
-                  <Form.Label>Borrower Name</Form.Label>
+                <Form.Group controlId="formIssueDescription">
+                  <Form.Label>Issue Description</Form.Label>
                   <Form.Control
                     type="text"
-                    placeholder="Enter borrower name"
-                    name="borrowerName"
-                    value={editData.borrowerName}
+                    placeholder="Enter issue description"
+                    name="issueDescription"
+                    value={editData.issueDescription}
                     onChange={handleEditChange}
                   />
                 </Form.Group>
@@ -405,48 +349,23 @@ const BorrowManagement = () => {
             </Row>
             <Row>
               <Col>
-                <Form.Group controlId="formBorrowerPhone">
-                  <Form.Label>Borrower Phone</Form.Label>
+                <Form.Group controlId="formReportedDate">
+                  <Form.Label>Reported Date</Form.Label>
                   <Form.Control
-                    type="text"
-                    placeholder="Enter borrower phone"
-                    name="borrowerPhone"
-                    value={editData.borrowerPhone}
+                    type="date"
+                    name="reportedDate"
+                    value={editData.reportedDate}
                     onChange={handleEditChange}
                   />
                 </Form.Group>
               </Col>
               <Col>
-                <Form.Group controlId="formBorrowedDate">
-                  <Form.Label>Borrowed Date</Form.Label>
+                <Form.Group controlId="formResolvedDate">
+                  <Form.Label>Resolved Date</Form.Label>
                   <Form.Control
                     type="date"
-                    name="borrowedDate"
-                    value={editData.borrowedDate}
-                    onChange={handleEditChange}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                <Form.Group controlId="formDueDate">
-                  <Form.Label>Due Date</Form.Label>
-                  <Form.Control
-                    type="date"
-                    name="dueDate"
-                    value={editData.dueDate}
-                    onChange={handleEditChange}
-                  />
-                </Form.Group>
-              </Col>
-              <Col>
-                <Form.Group controlId="formReturnedDate">
-                  <Form.Label>Returned Date</Form.Label>
-                  <Form.Control
-                    type="date"
-                    name="returnedDate"
-                    value={editData.returnedDate}
+                    name="resolvedDate"
+                    value={editData.resolvedDate}
                     onChange={handleEditChange}
                   />
                 </Form.Group>
@@ -477,13 +396,30 @@ const BorrowManagement = () => {
           <Button variant="secondary" onClick={handleCloseEditModal}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleUpdateBorrow}>
+          <Button variant="primary" onClick={handleUpdateMaintenance}>
             Save Changes
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={message.show}
+        onHide={() => setMessage({ ...message, show: false })}
+        centered>
+        <Modal.Body
+          className={`text-${
+            message.type === "success" ? "success" : "danger"
+          }`}>
+          {message.type === "success" ? (
+            <FaCheckCircle className="mr-2" />
+          ) : (
+            <FaExclamationCircle className="mr-2" />
+          )}
+          {message.content}
+        </Modal.Body>
       </Modal>
     </div>
   );
 };
 
-export default BorrowManagement;
+export default MaintenanceManagement;

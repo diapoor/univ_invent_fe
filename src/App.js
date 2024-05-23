@@ -11,6 +11,8 @@ import CreateInventory from "./components/inventory/CreateInventory";
 import InventoryDetails from "./components/inventory/InventoryDetails";
 import UpdateInventory from "./components/inventory/UpdateInventory";
 import BorrowManagement from "./components/borrow/Borrow";
+import Maintenance from "./components/maintenance/Maintenance";
+import LossesAndDamageManagement from "./components/lad/LossesAndDamage";
 function App() {
   return (
     <AuthProvider>
@@ -39,6 +41,8 @@ function App() {
                     element={<UpdateInventory />}
                   />
                   <Route path="/borrow" element={<BorrowManagement />} />
+                  <Route path="/maintenance" element={<Maintenance />} />
+                  <Route path="/lad" element={<LossesAndDamageManagement />} />
                   {/* Add more routes for other pages */}
                 </Routes>
               </Layout>

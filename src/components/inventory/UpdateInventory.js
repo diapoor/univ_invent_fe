@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../AuthContext";
 
 function UpdateInventory() {
   const { id } = useParams();
@@ -11,6 +13,17 @@ function UpdateInventory() {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [currentImage, setCurrentImage] = useState("");
+  const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
+
+  useEffect(() => {
+    const storedExpiryTime = parseInt(localStorage.getItem("expiryTime"));
+    const now = new Date().getTime();
+
+    if (!isLoggedIn || !storedExpiryTime || now >= storedExpiryTime) {
+      navigate("/auth/login");
+    }
+  }, [isLoggedIn, navigate]);
 
   useEffect(() => {
     const fetchItem = async () => {

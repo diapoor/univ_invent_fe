@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./WareHouse.css";
 import { useAuth } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
-import { FormControl } from "react-bootstrap";
+import { FormControl, Modal, Button } from "react-bootstrap";
 
 const Warehouse = () => {
   const { isLoggedIn } = useAuth();
@@ -15,8 +16,10 @@ const Warehouse = () => {
   const [form, setForm] = useState({ warehouseId: "", name: "", location: "" });
   const [isEditing, setIsEditing] = useState(false);
   const [message, setMessage] = useState("");
-  const [deleteMessage, setDeleteMessage] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [showDeleteMessageModal, setShowDeleteMessageModal] = useState(false);
+  const [deleteMessage, setDeleteMessage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -121,6 +124,9 @@ const Warehouse = () => {
       if (error.response && error.response.status === 400) {
         setDeleteMessage(error.response.data);
       }
+    } finally {
+      setShowDeleteMessageModal(true);
+      setShowDeleteConfirmModal(false);
     }
   };
 
@@ -187,10 +193,6 @@ const Warehouse = () => {
         </div>
       )}
       <div className="card mt-4">
-        {message && <div className="alert alert-success">{message}</div>}
-        {deleteMessage && (
-          <div className="alert alert-warning">{deleteMessage}</div>
-        )}
         <div className="card-header">
           <h3>Warehouse List</h3>
           <FormControl
@@ -222,63 +224,109 @@ const Warehouse = () => {
                     <button
                       onClick={() => handleEdit(warehouse)}
                       className="btn btn-warning btn-sm">
-                      Edit
+                      <i className="fas fa-edit"></i> Edit
                     </button>
                     <button
-                      onClick={() => deleteWarehouse(warehouse.warehouseId)}
+                      onClick={() => {
+                        setSelectedWarehouse(warehouse);
+                        setShowDeleteConfirmModal(true);
+                      }}
                       className="btn btn-danger btn-sm">
-                      Delete
+                      <i className="fas fa-trash-alt"></i> Delete
                     </button>
                     <button
                       onClick={() => fetchWarehouseById(warehouse.warehouseId)}
                       className="btn btn-info btn-sm">
-                      Details
+                      <i className="fas fa-info-circle"></i> Details
                     </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <ul>
-            {selectedWarehouse && (
-              <div className="card mt-4">
-                <div className="card-header">
-                  <h3>Warehouse Details</h3>
-                </div>
-                <div className="card-body">
-                  <p>ID: {selectedWarehouse.warehouseId}</p>
-                  <p>Name: {selectedWarehouse.name}</p>
-                  <p>Location: {selectedWarehouse.location}</p>
-                  <h4>Inventory</h4>
-                  <table className="inventory-table">
-                    <thead>
-                      <tr>
-                        <th>Item Name</th>
-                        <th>Description</th>
-                        <th>Total Quantity</th>
-                        <th>Image</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedWarehouse.inventories.map((inventory, index) => (
-                        <tr key={index}>
-                          <td>{inventory.itemName}</td>
-                          <td>{inventory.description}</td>
-                          <td>{inventory.totalQuantity}</td>
-                          <td>
-                            <img
-                              src={`http://localhost:8080/api/v1/inventory/image/${inventory.itemId}`}
-                              alt={`Image of ${inventory.itemName}`}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+          {selectedWarehouse && selectedWarehouse.inventories && (
+            <div className="card mt-4">
+              <div className="card-header">
+                <h3>Warehouse Details</h3>
               </div>
-            )}
-          </ul>
+              <div className="card-body">
+                <p>ID: {selectedWarehouse.warehouseId}</p>
+                <p>Name: {selectedWarehouse.name}</p>
+                <p>Location: {selectedWarehouse.location}</p>
+                <h4>Inventory</h4>
+                <table className="inventory-table table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Item Name</th>
+                      <th>Description</th>
+                      <th>Total Quantity</th>
+                      <th>Image</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedWarehouse.inventories.map((inventory, index) => (
+                      <tr key={index}>
+                        <td>{inventory.itemName}</td>
+                        <td>{inventory.description}</td>
+                        <td>{inventory.totalQuantity}</td>
+                        <td>
+                          <img
+                            src={`http://localhost:8080/api/v1/inventory/image/${inventory.itemId}`}
+                            alt={`Image of ${inventory.itemName}`}
+                            style={{ width: "50px", height: "50px" }}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+          <Modal
+            show={showDeleteConfirmModal}
+            onHide={() => setShowDeleteConfirmModal(false)}
+            centered>
+            <Modal.Header closeButton>
+              <Modal.Title>
+                <i className="fas fa-exclamation-triangle text-danger"></i>{" "}
+                Confirm Delete
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              Are you sure you want to delete this warehouse?
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="secondary"
+                onClick={() => setShowDeleteConfirmModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => deleteWarehouse(selectedWarehouse?.warehouseId)}>
+                Delete
+              </Button>
+            </Modal.Footer>
+          </Modal>
+          <Modal
+            show={showDeleteMessageModal}
+            onHide={() => setShowDeleteMessageModal(false)}
+            centered>
+            <Modal.Header closeButton>
+              <Modal.Title>
+                <i className="fas fa-info-circle"></i> Notification
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>{deleteMessage}</Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="primary"
+                onClick={() => setShowDeleteMessageModal(false)}>
+                Close
+              </Button>
+            </Modal.Footer>
+          </Modal>
         </div>
       </div>
     </div>

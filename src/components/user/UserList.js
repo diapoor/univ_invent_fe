@@ -3,7 +3,9 @@ import axios from "axios";
 import { Table, Button, Modal, FormControl } from "react-bootstrap";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./UserList.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
+import "./UserList.css"; // CSS tùy chỉnh
 import { useAuth } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -31,7 +33,6 @@ function UserList() {
     loadUsers();
   }, []);
 
-  // Function to load users
   const loadUsers = async () => {
     try {
       const result = await axios.get("http://localhost:8080/api/v1/user/list", {
@@ -47,10 +48,9 @@ function UserList() {
     }
   };
 
-  // Function to delete user
-  const deleteUser = async (username) => {
-    setDeleteUsername(username); // Store the username to delete in state
-    setShowConfirmDeleteModal(true); // Show the confirmation modal before deletion
+  const deleteUser = (username) => {
+    setDeleteUsername(username);
+    setShowConfirmDeleteModal(true);
   };
 
   const confirmDeleteUser = async () => {
@@ -64,7 +64,7 @@ function UserList() {
         if (response.status === 200) {
           setUsers(users.filter((user) => user.username !== deleteUsername));
           toast.success("User deleted successfully!");
-          setShowConfirmDeleteModal(false); // Close the confirmation modal after successful deletion
+          setShowConfirmDeleteModal(false);
           setShowDeleteModal(true);
         } else {
           toast.error("Error deleting user!");
@@ -76,7 +76,6 @@ function UserList() {
     }
   };
 
-  // Function to show user details
   const showUserDetails = async (username) => {
     try {
       const response = await axios.get(
@@ -94,12 +93,10 @@ function UserList() {
     }
   };
 
-  // Function to handle search input change
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
   };
 
-  // Filter users based on search value
   const filteredUsers = users.filter(
     (user) =>
       user.username.toLowerCase().includes(searchValue.toLowerCase()) ||
@@ -136,12 +133,12 @@ function UserList() {
                 <Button
                   variant="primary"
                   onClick={() => showUserDetails(user.username)}>
-                  View
+                  <i className="fas fa-info-circle"></i> View
                 </Button>{" "}
                 <Button
                   variant="danger"
                   onClick={() => deleteUser(user.username)}>
-                  Delete
+                  <i className="fas fa-trash-alt"></i> Delete
                 </Button>
               </td>
             </tr>
@@ -152,12 +149,19 @@ function UserList() {
       {/* Confirm Delete Modal */}
       <Modal
         show={showConfirmDeleteModal}
-        onHide={() => setShowConfirmDeleteModal(false)}>
+        onHide={() => setShowConfirmDeleteModal(false)}
+        centered>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm User Deletion</Modal.Title>
+          <Modal.Title>
+            <i className="fas fa-exclamation-circle text-danger"></i> Confirm
+            User Deletion
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you want to delete user {deleteUsername}?
+          <p className="text-danger">
+            Are you sure you want to delete user{" "}
+            <strong>{deleteUsername}</strong>?
+          </p>
         </Modal.Body>
         <Modal.Footer>
           <Button
@@ -172,11 +176,18 @@ function UserList() {
       </Modal>
 
       {/* Delete Success Modal */}
-      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+      <Modal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        centered>
         <Modal.Header closeButton>
-          <Modal.Title>Notification</Modal.Title>
+          <Modal.Title>
+            <i className="fas fa-check-circle text-success"></i> Notification
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body>User deleted successfully!</Modal.Body>
+        <Modal.Body>
+          <p className="text-success">User deleted successfully!</p>
+        </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
             Close
@@ -187,9 +198,12 @@ function UserList() {
       {/* User Details Modal */}
       <Modal
         show={showUserDetailsModal}
-        onHide={() => setShowUserDetailsModal(false)}>
+        onHide={() => setShowUserDetailsModal(false)}
+        centered>
         <Modal.Header closeButton>
-          <Modal.Title>User Details</Modal.Title>
+          <Modal.Title>
+            <i className="fas fa-info-circle text-primary"></i> User Details
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {selectedUser && (

@@ -1,20 +1,19 @@
-
-import React, {useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import './Home.css';
-import { useAuth } from './components/AuthContext';
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "./Home.css";
+import { useAuth } from "./components/AuthContext";
 function Home() {
-  const { username, isLoggedIn, logout,whoLogin } = useAuth();
+  const { username, isLoggedIn, logout, whoLogin } = useAuth();
   const navigate = useNavigate();
   const [showLogout, setShowLogout] = useState(false);
 
   useEffect(() => {
-    const storedExpiryTime = localStorage.getItem('expiryTime');
+    const storedExpiryTime = localStorage.getItem("expiryTime");
     const now = new Date().getTime();
     if (!isLoggedIn || !storedExpiryTime || now >= storedExpiryTime) {
-      navigate('/auth/login');
+      navigate("/auth/login");
     }
-  }, [isLoggedIn, navigate, logout,whoLogin]);
+  }, [isLoggedIn, navigate, logout, whoLogin]);
 
   const handleUsernameClick = () => {
     setShowLogout(true);
@@ -25,7 +24,7 @@ function Home() {
 
   const handleLogout = () => {
     logout();
-    navigate('/auth/login');
+    navigate("/auth/login");
   };
 
   return (
@@ -34,14 +33,13 @@ function Home() {
         Welcome to Inventory Management System
       </h1>
       {isLoggedIn && (
-        <div className={`user-info ${showLogout ? 'show-logout' : ''}`}>
+        <div className={`user-info ${showLogout ? "show-logout" : ""}`}>
           <span className="username" onClick={handleUsernameClick}>
             {username}
           </span>
           <button
             onClick={handleLogout}
-            className="logout-button animate__animated animate__fadeInUp"
-          >
+            className="logout-button animate__animated animate__fadeInUp">
             Logout
           </button>
         </div>
@@ -57,10 +55,10 @@ function Home() {
           <Link to="/borrow">Borrow Management</Link>
         </div>
         <div className="menu-item">
-          <Link to="/repair">Repair Management</Link>
+          <Link to="/maintenance">Maintenance Management</Link>
         </div>
         <div className="menu-item">
-          <Link to="/damaged">Damaged Items Management</Link>
+          <Link to="/lad">Damaged and Lossed Items Management</Link>
         </div>
         <div className="menu-item">
           <Link to="/user">User Management</Link>

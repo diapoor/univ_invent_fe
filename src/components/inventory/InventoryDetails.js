@@ -12,12 +12,23 @@ import {
 } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import { useAuth } from "../AuthContext";
 
 const InventoryDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [item, setItem] = useState(null);
   const [error, setError] = useState("");
+  const { isLoggedIn } = useAuth();
+
+  useEffect(() => {
+    const storedExpiryTime = parseInt(localStorage.getItem("expiryTime"));
+    const now = new Date().getTime();
+
+    if (!isLoggedIn || !storedExpiryTime || now >= storedExpiryTime) {
+      navigate("/auth/login");
+    }
+  }, [isLoggedIn, navigate]);
 
   useEffect(() => {
     const fetchItemDetails = async () => {
