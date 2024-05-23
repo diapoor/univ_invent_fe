@@ -10,6 +10,7 @@ import InventoryManagement from "./components/inventory/Inventory";
 import CreateInventory from "./components/inventory/CreateInventory";
 import InventoryDetails from "./components/inventory/InventoryDetails";
 import UpdateInventory from "./components/inventory/UpdateInventory";
+import BorrowManagement from "./components/borrow/Borrow";
 function App() {
   return (
     <AuthProvider>
@@ -37,6 +38,7 @@ function App() {
                     path="/inventory/update/:id"
                     element={<UpdateInventory />}
                   />
+                  <Route path="/borrow" element={<BorrowManagement />} />
                   {/* Add more routes for other pages */}
                 </Routes>
               </Layout>
